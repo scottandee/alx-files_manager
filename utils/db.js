@@ -28,6 +28,22 @@ class DBClient {
     const users = await collection.find({}).toArray();
     return users.length;
   }
+
+  async getUserByEmail(email) {
+    const db = this.client.db(this.db);
+    const collection = db.collection('users');
+    const result = await collection.find({ email }).toArray();
+    return result;
+  }
+
+  async insertUser(email, hashedPwd) {
+    const db = this.client.db(this.db);
+    const collection = db.collection('users');
+    collection.insertOne({ email, password: hashedPwd });
+
+    const newUser = await collection.find({ email }).toArray();
+    return { id: newUser[0]._id, email: newUser[0].email };
+  }
 }
 
 const dbClient = new DBClient();
