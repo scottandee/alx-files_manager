@@ -1,4 +1,4 @@
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 
 class DBClient {
   constructor() {
@@ -33,6 +33,13 @@ class DBClient {
     const db = this.client.db(this.db);
     const collection = db.collection('users');
     const result = await collection.find({ email }).toArray();
+    return result;
+  }
+
+  async getUserById(id) {
+    const db = this.client.db(this.db);
+    const collection = db.collection('users');
+    const result = await collection.find({ _id: ObjectId(id) }).toArray();
     return result;
   }
 

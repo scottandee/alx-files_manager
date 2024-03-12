@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const dbClient = require('../utils/db');
+const redisClient = require('../utils/redis');
 
 async function postNew(req, res) {
   const { email, password } = req.body;
@@ -29,4 +30,16 @@ async function postNew(req, res) {
   res.status(201).json(newUser);
 }
 
-module.exports = { postNew };
+async function getMe(req, res) {
+  const token = req.get('X-Token');
+  const key = `auth_${token}`;
+  const userId = await redisClient.get(key);
+  if (!userId) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return;
+  }
+  const user = await dbClient.getUserById(userId);
+  res.status(200).json({ id: user[0]._id, email: user[0].email });
+}
+
+module.exports = { postNew, getMe };
