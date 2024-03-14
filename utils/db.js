@@ -51,6 +51,31 @@ class DBClient {
     const newUser = await collection.find({ email }).toArray();
     return { id: newUser[0]._id, email: newUser[0].email };
   }
+
+  async insertFile(userId, name, isPublic = false, parentId = 0, type, localpath = null) {
+    const db = this.client.db(this.db);
+    const collection = db.collection('files');
+    if (localpath) {
+      collection.insertOne({
+        userId, name, type, isPublic, parentId, localpath,
+      });
+    } else {
+      collection.insertOne({
+        userId, name, type, isPublic, parentId,
+      });
+    }
+    const newFile = await collection.find({ name }).toArray();
+    return {
+      id: newFile[0]._id, userId, name, type, isPublic, parentId,
+    };
+  }
+
+  async findFileByParent(id) {
+    const db = this.client.db(this.db);
+    const collection = db.collection('files');
+    const result = await collection.find({ _id: ObjectId(id) }).toArray();
+    return result;
+  }
 }
 
 const dbClient = new DBClient();
